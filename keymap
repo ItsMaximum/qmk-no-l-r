@@ -1,0 +1,77 @@
+enum keybinds {
+    UP = KC_W,
+    DOWN = KC_S,
+    LEFT = KC_A,
+    RIGHT = KC_D
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    static bool up = false;
+    static bool down = false;
+    static bool left = false;
+    static bool right = false;
+    
+    static bool u_d = false;
+    static bool l_r = false;
+
+    switch (keycode) {
+        case UP:
+            up = record->event.pressed;
+            break;
+        case DOWN:
+            down = record->event.pressed;
+            break;
+        case LEFT:
+            left = record->event.pressed;
+            break;
+        case RIGHT:
+            right = record->event.pressed;
+            break;
+    }
+    
+    bool cancel_input = false;
+    
+    if (left && right && !l_r) {
+        unregister_code(LEFT);
+        unregister_code(RIGHT);
+        l_r = true;
+        cancel_input = true;
+    }
+    
+    if (up && down && !u_d) {
+        unregister_code(UP);
+        unregister_code(DOWN);
+        u_d = true;
+        cancel_input = true;
+    }
+    
+    if (cancel_input) {
+        return false;
+    }
+    
+    if (l_r) {
+        if (left && !right) {
+            l_r = false;
+            register_code(LEFT);
+        } else if (!left && right) {
+            l_r = false;
+            register_code(RIGHT);
+        } else if (!left && !right) {
+            l_r = false;
+        } 
+    }
+    
+    if (u_d) {
+        if (up && !down) {
+            u_d = false;
+            register_code(UP);
+        } else if (!up && down) {
+            u_d = false;
+            register_code(DOWN);
+        } else if (!up && !down) {
+            u_d = false;
+        } 
+    }
+
+    return true;
+}
